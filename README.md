@@ -74,7 +74,7 @@ Der lokale Einrichtungshelfer nutzt den vorhandenen Secret-Key nur im Arbeitsspe
 npm run build
 ```
 
-`dist/` enthält ausschliesslich `index.html`, `app.js`, `styles.css`, `config.js`, `favicon.svg` und `.nojekyll`. Kein Admin-Helfer, keine Passwörter und keine Entwicklungsabhängigkeiten werden mitgebaut.
+`dist/` enthält ausschliesslich `index.html`, `app.<Versionskennung>.js`, `styles.<Versionskennung>.css`, `config.js`, `favicon.svg` und `.nojekyll`. Die Versionskennungen verhindern, dass Browser alte Programmdateien zur neuen Oberfläche laden. Kein Admin-Helfer, keine Passwörter und keine Entwicklungsabhängigkeiten werden mitgebaut.
 
 Für das vollständige Quellprojekt kann `.github/workflows/pages.yml` nach GitHub gepusht und in Settings → Pages als Quelle **GitHub Actions** gewählt werden.
 

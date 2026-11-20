@@ -7,27 +7,26 @@
   <meta name="description" content="Die Kuchenliga unserer Klasse. Kuchen probieren, ehrlich bewerten und gemeinsam den Favoriten finden.">
   <title>Kuchenliga · Ein Stück Klassenliebe</title>
   <link rel="icon" type="image/svg+xml" href="./favicon.svg">
-  <link rel="stylesheet" href="./styles.css">
-  <script type="module" src="./app.js"></script>
+  <link rel="stylesheet" href="./styles.b3535e81ba62.css">
+  <script type="module" src="./app.83280f5b1b5b.js"></script>
 </head>
 <body>
   <a class="skip" href="#main">Zum Inhalt</a>
   <header class="site-header wrap">
     <a class="brand" href="./" aria-label="Kuchenliga Startseite">kuchenliga<span class="brand-dot">.</span></a>
-    <nav class="main-nav" aria-label="Hauptnavigation"><button class="nav-link active" data-view="cakes">Kuchen</button><button class="nav-link" data-view="ranking">Rangliste</button><button class="nav-link" data-view="schedule">Kuchenplan</button><button class="nav-link" data-view="rules">Spielregeln</button></nav>
+    <nav class="main-nav" aria-label="Hauptnavigation"><button class="nav-link active" data-view="cakes">Kuchen</button><button class="nav-link" data-view="ranking">Aktueller Stand</button></nav>
     <div id="account"><button class="button small dark" data-login>Anmelden </button></div>
   </header>
   <main id="main">
-    <section class="intro wrap"><h1>Unsere Kuchenliga</h1><p>Kuchen probieren, einmal bewerten. Wer backt den Klassenfavoriten?</p></section>
     <section class="league wrap" aria-label="Kuchenliga">
-      <div id="mode-banner" class="mode-banner" role="status"></div>
+      <div id="mode-banner" hidden></div>
       <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
       <div id="view-cakes">
-        <div class="section-head"><div><p class="section-kicker">9 Kuchen · 12 Personen</p><h2>Kuchenübersicht<span class="count">9</span></h2></div><div class="filters" aria-label="Kuchen filtern"><button class="filter active" data-filter="all" aria-pressed="true">Alle Kuchen</button><button class="filter" data-filter="open" aria-pressed="false">Noch offen</button><button class="filter" data-filter="done" aria-pressed="false">Bewertet</button></div></div>
+        <div class="section-head"><div><h1 class="sr-only">Kuchenübersicht <span class="count">9</span></h1><span class="list-summary">9 Kuchen</span></div><div class="filters" aria-label="Kuchen filtern"><button class="filter active" data-filter="all" aria-pressed="true">Alle Kuchen</button><button class="filter" data-filter="open" aria-pressed="false">Noch offen</button><button class="filter" data-filter="done" aria-pressed="false">Bewertet</button></div></div>
         <div id="progress" hidden></div><div id="cakes" class="cake-grid"></div>
-        <p class="quiet-note">Neun Kuchen. Zwölf persönliche Zugänge. Eine ehrliche Wertung pro Kuchen.</p>
+        
       </div>
-      <div id="view-ranking" hidden><div class="section-head"><div><p class="section-kicker">Die Ergebnisse</p><h2>Die Rangliste</h2></div><button id="refresh" class="button outline small">Aktualisieren</button></div><p class="section-intro">Der Durchschnitt entscheidet. Wie viele mitbewertet haben, siehst du direkt daneben.</p><div id="ranking"></div></div>
+      <div id="view-ranking" hidden><div class="section-head"><div><h1 class="sr-only">Aktueller Stand</h1><span class="list-summary">Durchschnittliche Punkte</span></div><button id="refresh" class="button outline small">Aktualisieren</button></div><div id="ranking"></div></div>
       <div id="view-schedule" hidden><p class="section-kicker">Alle Termine auf einen Blick.</p><h2>Unser Kuchenplan</h2><p class="section-intro">Bewerten geht erst ab dem jeweiligen Datum. Berni, Joel Stocker und Raphael stimmen mit ab, ohne selbst einen Kuchen mitzubringen.</p><div id="schedule-list"></div></div><div id="view-rules" hidden><p class="section-kicker">So funktioniert es.</p><h2>Unsere Spielregeln</h2><div class="rules-grid"><article><span aria-hidden="true">🥧</span><h3>Die Klasse backt.</h3><p>Neun Kuchen, zwölf Stimmen. Berni, Joel Stocker und Raphael bewerten mit, ohne selbst zu backen. Probiert erst, bevor ihr Punkte verteilt.</p></article><article><span aria-hidden="true">✦</span><h3>Dein Geschmack zählt.</h3><p>Vergib 1 bis 10 Punkte. 1 bedeutet «nicht mein Fall», 10 bedeutet «bitte noch ein Stück».</p></article><article><span aria-hidden="true">🔒</span><h3>Einmal ist einmal.</h3><p>Eine abgesendete Wertung ist endgültig. Deinen eigenen Kuchen kannst du nicht bewerten. Andere Kuchen werden erst ab ihrem geplanten Datum freigeschaltet.</p></article><article><span aria-hidden="true">♥</span><h3>Bleibt unter euch.</h3><p>Teile dein Passwort nicht. Andere sehen die Durchschnittspunkte, aber nicht deine einzelne Bewertung.</p></article></div></div>
     </section>
   </main>
