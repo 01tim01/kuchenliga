@@ -5,7 +5,7 @@ Die Klassen-Kuchenbewertung: neun Kuchen, zwölf persönliche Zugänge, 1–10 P
 ## Wer macht mit?
 
 Kuchen: Nico, Livio, Kimo, Kyle, Noemi, Maria, Anina, Joel Häusler und Tim.
-Nur abstimmen: Joel Stocker, Raphael und Berni (Lehrer).
+Nur abstimmen: Joel Stocker, Raphael und Berny (Lehrer).
 
 | Datum | Kuchen von |
 |---|---|
@@ -95,7 +95,7 @@ Die erste Veröffentlichung über den Browser lädt den Inhalt von `dist/` direk
 
 Die Kuchenübersicht verwendet grosse Kacheln. Nach der Registrierung erscheint auf der eigenen Kachel «Foto hinzufügen» bzw. «Foto ändern». JPEG-, PNG- und WebP-Bilder bis 10 MB werden im Browser in ein WebP mit maximal 1600 Pixeln und 1 MB umgewandelt. Dabei wird das Bild neu gezeichnet und Fotometadaten werden nicht übernommen.
 
-`supabase/photos.sql` richtet den privaten Storage-Bucket `cake-photos` ein. Die Klasse darf Fotos lesen; ausschliesslich die zugehörige backende Person darf ihr festes Objekt `<login>.webp` hochladen oder ersetzen. Berni, Joel Stocker und Raphael besitzen keinen Kuchen. Nicht angemeldete Besucher sehen neutrale Platzhalter. Links zu Bildern sind zeitlich begrenzt.
+`supabase/photos.sql` richtet den privaten Storage-Bucket `cake-photos` ein. Die Klasse darf Fotos lesen; ausschliesslich die zugehörige backende Person darf ihr festes Objekt `<login>.webp` hochladen oder ersetzen. Berny, Joel Stocker und Raphael besitzen keinen Kuchen. Nicht angemeldete Besucher sehen neutrale Platzhalter. Links zu Bildern sind zeitlich begrenzt.
 
 ## Freie Registrierung mit eigenem Passwort
 
@@ -106,3 +106,17 @@ Ein Name kann nur einmal registriert werden. Die Datenbank reserviert ihn währe
 **Bewusst gewählte Einschränkung:** Es gibt keine Identitätsprüfung. Wer zuerst einen noch freien Namen auswählt, erhält diesen Zugang. Das kann auch eine andere Person sein. Diese freie Registrierung wurde vom Organisator ausdrücklich gewählt. Nach der Anmeldung gelten weiterhin die einmalige Bewertung pro Kuchen, die Terminsperren und der Schutz fremder Fotos.
 
 Technik: Nach `schema.sql`, `photos.sql` und `registration.sql` auch `free-registration.sql` ausführen. `supabase/functions/register/index.ts` als Edge Function `register` bereitstellen; `verify_jwt=false` ist in `supabase/config.toml` festgelegt. Der geheime Projektschlüssel bleibt ausschliesslich serverseitig. Die alten privaten Linkdateien werden für diese Registrierung nicht mehr benötigt.
+
+## Private Backendübersichten
+
+`supabase/admin-overview.sql` ergänzt im Supabase Table Editor drei Ansichten für die Projektverwaltung:
+
+- `admin_bewertungsmatrix`: eine Zeile je Person und eine Spalte je Kuchen; Punkte, offene Wertungen, Terminsperren und Registrierungsstatus.
+- `admin_einzelbewertungen`: alle Einzelstimmen mit Namen, Punkten und Schweizer Zeitpunkt.
+- `admin_zugaenge`: Namen, Passwortstatus, Registrierung und letzte Anmeldung. Lesbare Passwörter oder Hashes werden nicht ausgegeben.
+
+Die Ansichten sind für `anon` und `authenticated` gesperrt und nur über die Projektverwaltung bzw. `service_role` lesbar. Änderungen an Stimmen oder Konten werden durch diese Ansichten nicht ermöglicht.
+
+## Eigene Profilbilder
+
+Im eigenen Profil kann jede registrierte Person ein Profilbild hochladen, ersetzen oder entfernen. Dazu `supabase/profile-photos.sql` anwenden. Der private Bucket `profile-photos` speichert je Person nur `<login>.webp`, maximal 1 MB. Der Browser verkleinert Fotos und entfernt eingebettete Fotometadaten. Klassenmitglieder können die Bilder sehen; nur die jeweilige Person darf ihr eigenes Bild ändern oder löschen. Nach dem Entfernen erscheint wieder der gewählte Emoji-Avatar. Berny behält intern den bestehenden Login `berni`.
