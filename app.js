@@ -95,7 +95,6 @@ const escape=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&g
 const configured=Boolean(/^https:\/\/[a-z0-9-]+\.supabase\.co$/.test(CONFIG.supabaseUrl) && (CONFIG.publishableKey.startsWith('sb_publishable_') || CONFIG.publishableKey.startsWith('eyJ')));
 const api=configured?new ClassApi(CONFIG):null;
 const state={profile:{avatar:'🍰',color:'#eaf3fc'},person:null,votes:[],ranking:[],filter:'all',view:'cakes',target:null,score:null,saving:false,loading:false};
-const palettes=[['#edf2fb','#d6a65d','#fff9ea','#fff8e7'],['#f7e9e9','#8b5e4a','#674437','#fff2db'],['#ecf2e6','#cf9b57','#eef0d9','#f9f4db'],['#fff1d5','#e1af5c','#fff9ea','#db5364'],['#eeeaf5','#8c624e','#f5e5e0','#fff4dc'],['#f9e9ee','#daa862','#ffe1df','#fff9e9'],['#e8f2ef','#daa65d','#fff9ea','#bc6277'],['#f8eddc','#9b6a48','#e8c79c','#fff9eb'],['#e8edf8','#d8ab63','#fffae9','#fff1dc'],['#fae9df','#c89151','#fff4da','#d86b55']];
 const blankRanking=()=>ROSTER.map(p=>({...p,average:null,vote_count:0}));
 const number=n=>Number(n).toLocaleString('de-CH',{minimumFractionDigits:1,maximumFractionDigits:1});
 const dateLabel=date=>new Intl.DateTimeFormat('de-CH',{day:'2-digit',month:'2-digit',year:'numeric',timeZone:'Europe/Zurich'}).format(new Date(date+'T12:00:00Z'));
@@ -105,20 +104,19 @@ function dialogError(id,message){$(id).textContent=message;$(id).hidden=!message
 function showView(view){state.view=view;for(const name of ['cakes','ranking','schedule','rules'])$('#view-'+name).hidden=name!==view;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));}
 function render(){
   const signedIn=Boolean(state.person); const ranked=rankCakes(state.ranking.length?state.ranking:blankRanking());
-  $('#account').innerHTML=signedIn?`<div class="account-user"><button id="open-profile" aria-label="Profil bearbeiten"><span class="profile-avatar" style="background:${state.profile.color}">${state.profile.avatar}</span><span>${escape(state.person.name)}</span></button><button id="logout">Abmelden</button></div>`:'<button class="button small dark" data-login>Anmelden <span aria-hidden="true">↗</span></button>';
+  $('#account').innerHTML=signedIn?`<div class="account-user"><button id="open-profile" aria-label="Profil bearbeiten"><span class="profile-avatar" style="background:${state.profile.color}">${state.profile.avatar}</span><span>${escape(state.person.name)}</span></button><button id="logout">Abmelden</button></div>`:'<button class="button small dark" data-login>Anmelden</button>';
   $('#mode-banner').classList.toggle('live',signedIn);
-  $('#mode-banner').innerHTML=signedIn?'Persönlich angemeldet. Deine Bewertungen werden sicher gespeichert.':configured?'Die Kuchenliga ist bereit. <button data-login>Melde dich an</button>, um zu bewerten und die Rangliste zu sehen.':'Vorschau: Die Datenbank ist noch nicht verbunden. Es werden keine Stimmen gespeichert.';
+  $('#mode-banner').innerHTML=signedIn?'Du kannst jeden freigegebenen Kuchen einmal bewerten. Deine Wertung ist endgültig.':configured?'<button data-login>Anmelden</button>, um Kuchen zu bewerten und die Rangliste zu sehen.':'Vorschau: Die Datenbank ist noch nicht verbunden. Es werden keine Stimmen gespeichert.';
   const byId=new Map(ranked.map(p=>[p.id,p]));
   const cakes=ROSTER.filter(p=>{
     const voted=state.votes.some(v=>v.target_id===p.id);
     const cake=byId.get(p.id);const date=signedIn?cake?.baking_date:p.date;return state.filter==='all'||(state.filter==='done'?voted:!voted&&p.id!==state.person?.id&&isOpen({date}));
   });
   $('#cakes').innerHTML=cakes.length?cakes.map(p=>{
-    const i=ROSTER.findIndex(r=>r.id===p.id),cake=byId.get(p.id)||p,vote=signedIn?state.votes.find(v=>v.target_id===p.id):null,self=state.person?.id===p.id;
-    const [tile,sponge,icing,cream]=palettes[i%palettes.length];
+    const cake=byId.get(p.id)||p,vote=signedIn?state.votes.find(v=>v.target_id===p.id):null,self=state.person?.id===p.id;
     const date=signedIn?cake.baking_date:p.date;const locked=!isOpen({date});
     const avatar=AVATARS.includes(cake.avatar)?cake.avatar:'🍰',color=COLORS.includes(cake.color)?cake.color:'#eaf3fc';
-    return `<article class="cake-card"><div class="cake-visual" style="--tile:${tile};--sponge:${sponge};--icing:${icing};--cream:${cream}" aria-hidden="true"><span class="cake-number">${String(i+1).padStart(2,'0')}</span><div class="mini-cake"><i class="berry"></i><i class="sprinkle"></i></div></div><div class="card-content"><p class="baked-by">Gebacken von</p><h3><span class="card-avatar" style="background:${color}" aria-hidden="true">${avatar}</span>${escape(p.name)}</h3><p class="baking-date">${date?dateLabel(date):'Termin folgt'}</p><div class="card-stats"><span class="average"><span class="star" aria-hidden="true">★</span> ${signedIn&&cake.vote_count?number(cake.average)+' / 10':'Noch offen'}</span><span>${signedIn?cake.vote_count||0:0} Bewertungen</span></div><button class="card-button ${vote?'done':self?'self':''}" ${vote||self||locked?'disabled':''} data-vote="${p.id}" aria-label="${vote?'Bereits bewertet':self?'Dein eigener Kuchen':locked?escape(p.name)+': ab '+dateLabel(date):escape(p.name)+' bewerten'}">${vote?'Deine Wertung: '+vote.score+'/10':self?'Dein eigener Kuchen':locked?'Ab '+dateLabel(date):'Kuchen bewerten'}</button></div></article>`;
+    return `<article class="cake-card"><div class="person-block"><span class="card-avatar" style="background:${color}" aria-hidden="true">${avatar}</span><div><h3>${escape(p.name)}</h3>${self?'<span class="self-label">Dein Kuchen</span>':''}</div></div><div class="date-block"><span class="row-label">Kuchentermin</span><span>${date?dateLabel(date):'Termin folgt'}</span></div><div class="score-block"><span class="average">${signedIn&&cake.vote_count?number(cake.average)+' / 10':'Noch keine Punkte'}</span><span class="row-label">${signedIn?cake.vote_count||0:0} Bewertungen</span></div><button class="card-button ${vote?'done':self?'self':''}" ${vote||self||locked?'disabled':''} data-vote="${p.id}" aria-label="${vote?'Bereits bewertet':self?'Dein eigener Kuchen':locked?escape(p.name)+': ab '+dateLabel(date):escape(p.name)+' bewerten'}">${vote?'Deine Wertung: '+vote.score+'/10':self?'Dein eigener Kuchen':locked?'Ab '+dateLabel(date):'Bewerten'}</button></article>`;
   }).join(''):`<div class="empty"><span class="empty-icon" aria-hidden="true">${state.filter==='done'?'✦':'✓'}</span><h3>${state.filter==='done'?'Hier kommen deine Wertungen hin.':'Für heute alles bewertet.'}</h3><p>${state.filter==='done'?'Sobald du einen Kuchen bewertest, findest du ihn hier.':'Weitere Kuchen werden an ihrem Termin freigeschaltet.'}</p></div>`;
   $('#progress').hidden=!signedIn;
   $('#progress').innerHTML=`<div class="progress-text"><span>Dein Kuchenpass</span><span>${state.votes.length} von ${ROSTER.length-(ROSTER.some(p=>p.id===state.person?.id)?1:0)} bewertet</span></div><div class="progress-bar"><i style="width:${state.votes.length/(ROSTER.length-(ROSTER.some(p=>p.id===state.person?.id)?1:0))*100}%"></i></div>`;
@@ -165,7 +163,7 @@ document.addEventListener('click',async event=>{
   const score=event.target.closest('[data-score]');if(score&&!state.saving){state.score=Number(score.dataset.score);document.querySelectorAll('[data-score]').forEach(b=>b.setAttribute('aria-pressed',String(b===score)));$('#selection-summary').textContent=`${state.score} von 10 Punkten für ${state.target.name}`;updateSubmit();return;}
   if(event.target.closest('#logout')){viewGeneration++;state.loading=false;const logout=api.logout();state.person=null;state.votes=[];state.ranking=[];state.profile={avatar:'🍰',color:'#eaf3fc'};state.filter='all';document.querySelector('[data-filter="all"]').click();notice('Du bist abgemeldet.');render();await logout;}
 });
-$('#start-voting').addEventListener('click',()=>{showView('cakes');$('.league').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});
+$('#start-voting')?.addEventListener('click',()=>{showView('cakes');$('.league').scrollIntoView({behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});
 $('#vote-confirm').addEventListener('change',updateSubmit);
 $('#vote-dialog').addEventListener('cancel',event=>{if(state.saving)event.preventDefault();});
 let loginViewAttempt=0;
