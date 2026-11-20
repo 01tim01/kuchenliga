@@ -62,7 +62,7 @@ Die Datenbanktests verwenden einen echten lokalen Postgres-Kern (PGlite) mit Rol
 3. Projekt-URL und **öffentlichen Publishable-Key** in `config.js` eintragen. Ein geheimer Schlüssel gehört niemals in diese Datei.
 4. Optional öffentliche Registrierung unter Authentication deaktivieren. Unbekannte Konten erhalten auch bei offener Registrierung keinen Klassenzugang.
 5. Zwölf Konten einmalig erstellen: `npm run setup:users`. Der geheime Projektschlüssel wird im Terminal unsichtbar abgefragt und nicht gespeichert. Alternativ `node scripts/setup-server.mjs` starten und den Schlüssel auf `http://127.0.0.1:4174/` eingeben.
-6. Die Datei `private/kuchenliga-zugaenge.csv` privat behalten. Jede Person erhält nur ihre eigene Zeile. Die Zugangsliste, der Einrichtungsstand und sämtliche geheimen Schlüssel dürfen nie auf GitHub oder die Webseite.
+6. Anschliessend die unten beschriebene Erstregistrierung einrichten und persönliche Registrierungslinks erzeugen. Jede Person erhält nur ihren eigenen Link und legt ihr Passwort selbst fest. Private Einrichtungsdateien und geheime Schlüssel dürfen nie auf GitHub oder die Webseite.
 
 Die Logins nutzen interne Adressen wie `tim@kuchenliga.invalid`. Das sind keine realen E-Mail-Postfächer und sie versenden keine Mails. Bei vergessenem Passwort muss der Projektbesitzer den Zugang administrativ zurücksetzen. Die Webseite selbst erlaubt keine Registrierung oder Passwortänderung.
 
@@ -90,3 +90,19 @@ Die erste Veröffentlichung über den Browser lädt den Inhalt von `dist/` direk
 - [Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)
 - [Supabase API-Schlüssel](https://supabase.com/docs/guides/getting-started/api-keys)
 - [Supabase Admin-Benutzeranlage](https://supabase.com/docs/reference/javascript/auth-admin-createuser)
+
+## Eigene Kuchenfotos
+
+Die Kuchenübersicht verwendet grosse Kacheln. Nach der Registrierung erscheint auf der eigenen Kachel «Foto hinzufügen» bzw. «Foto ändern». JPEG-, PNG- und WebP-Bilder bis 10 MB werden im Browser in ein WebP mit maximal 1600 Pixeln und 1 MB umgewandelt. Dabei wird das Bild neu gezeichnet und Fotometadaten werden nicht übernommen.
+
+`supabase/photos.sql` richtet den privaten Storage-Bucket `cake-photos` ein. Die Klasse darf Fotos lesen; ausschliesslich die zugehörige backende Person darf ihr festes Objekt `<login>.webp` hochladen oder ersetzen. Berni, Joel Stocker und Raphael besitzen keinen Kuchen. Nicht angemeldete Besucher sehen neutrale Platzhalter. Links zu Bildern sind zeitlich begrenzt.
+
+## Erstregistrierung mit eigenem Passwort
+
+Die anfängliche Passwortverteilung ist ersetzt durch persönliche, einmalige Registrierungslinks. Jede Person öffnet ihren Link und wählt ein eigenes Passwort mit 12–128 Zeichen. Ein öffentlich auswählbarer Name allein vergibt keinen Zugang.
+
+Einrichtung: `schema.sql`, `photos.sql` und `registration.sql` ausführen; die Edge Function `supabase/functions/register/index.ts` als `register` bereitstellen. Die Funktion prüft Einladungen selbst; `verify_jwt = false` steht deshalb explizit in `supabase/config.toml`. Die automatisch bereitgestellten `SUPABASE_URL` und `SUPABASE_SERVICE_ROLE_KEY` bleiben ausschliesslich serverseitig.
+
+Der erste Aufruf prüft den nur gehasht gespeicherten Einladungstoken. Beim Festlegen des Passworts reserviert die Datenbank den Link kurz, die Funktion setzt das Passwort über die offizielle Auth Admin API und bestätigt anschliessend die Aktivierung. Fehlgeschlagene Versuche geben die Reservierung frei; ein erfolgreicher Link ist danach ungültig. Unregistrierte Konten dürfen keine Stimmen abgeben.
+
+Der Organisator erzeugt die Links einmalig mit `node scripts/invites-server.mjs` und dem bestehenden geheimen Projektschlüssel auf `http://127.0.0.1:4174/`. Die private Liste steht in `private/kuchenliga-registrierungslinks.csv`. Jede Person erhält nur ihren eigenen Link. Links gelten 30 Tage; verbrauchte Links vergeben keinen zweiten Zugang. Das gewählte Passwort wird nicht in der Linkliste gespeichert oder an den Organisator übermittelt.

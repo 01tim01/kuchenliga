@@ -10,6 +10,7 @@ create table if not exists public.members (
 alter table public.members alter column participant_id drop not null;
 alter table public.members add column if not exists display_name text not null default '';
 alter table public.members add column if not exists login_id text unique;
+alter table public.members add column if not exists registered_at timestamptz;
 create table if not exists public.votes (
   voter_id uuid not null references auth.users(id),
   target_id text not null references public.participants(id),
@@ -45,15 +46,15 @@ drop policy if exists own_membership on public.members;
 create policy own_membership on public.members for select to authenticated using (user_id = (select auth.uid()));
 drop policy if exists class_roster on public.participants;
 create policy class_roster on public.participants for select to authenticated
-  using (active and exists (select 1 from public.members where user_id = (select auth.uid())));
+  using (active and exists (select 1 from public.members where user_id = (select auth.uid()) and registered_at is not null));
 drop policy if exists own_votes on public.votes;
 create policy own_votes on public.votes for select to authenticated
-  using (voter_id = (select auth.uid()) and exists (select 1 from public.members where user_id = (select auth.uid())));
+  using (voter_id = (select auth.uid()) and exists (select 1 from public.members where user_id = (select auth.uid()) and registered_at is not null));
 drop policy if exists cast_one_vote on public.votes;
 create policy cast_one_vote on public.votes for insert to authenticated
   with check (
     voter_id = (select auth.uid())
-    and exists (select 1 from public.members where user_id = (select auth.uid()) and (participant_id is null or participant_id <> target_id))
+    and exists (select 1 from public.members where user_id = (select auth.uid()) and registered_at is not null and (participant_id is null or participant_id <> target_id))
     and exists (select 1 from public.participants where id=target_id and active and baking_date <= (now() at time zone 'Europe/Zurich')::date)
   );
 drop policy if exists read_own_profile on public.profiles;
@@ -61,7 +62,7 @@ create policy read_own_profile on public.profiles for select to authenticated
   using (user_id = (select auth.uid()));
 drop policy if exists create_own_profile on public.profiles;
 create policy create_own_profile on public.profiles for insert to authenticated
-  with check (user_id = (select auth.uid()) and exists (select 1 from public.members where user_id = (select auth.uid())));
+  with check (user_id = (select auth.uid()) and exists (select 1 from public.members where user_id = (select auth.uid()) and registered_at is not null));
 drop policy if exists update_own_profile on public.profiles;
 create policy update_own_profile on public.profiles for update to authenticated
   using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
@@ -72,7 +73,7 @@ create function public.leaderboard()
 returns table (id text,name text,average numeric,vote_count bigint,baking_date date,avatar text,color text)
 language plpgsql stable security definer set search_path = '' as $$
 begin
-  if not exists (select 1 from public.members m where m.user_id = auth.uid()) then
+  if not exists (select 1 from public.members m where m.user_id = auth.uid() and m.registered_at is not null) then
     raise exception 'Kein Klassenzugang' using errcode = '42501';
   end if;
   return query select p.id,p.name,avg(v.score),count(v.score),p.baking_date,coalesce(pr.avatar,'🍰'),coalesce(pr.color,'#eaf3fc')
