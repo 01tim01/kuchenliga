@@ -62,7 +62,7 @@ Die Datenbanktests verwenden einen echten lokalen Postgres-Kern (PGlite) mit Rol
 3. Projekt-URL und **öffentlichen Publishable-Key** in `config.js` eintragen. Ein geheimer Schlüssel gehört niemals in diese Datei.
 4. Optional öffentliche Registrierung unter Authentication deaktivieren. Unbekannte Konten erhalten auch bei offener Registrierung keinen Klassenzugang.
 5. Zwölf Konten einmalig erstellen: `npm run setup:users`. Der geheime Projektschlüssel wird im Terminal unsichtbar abgefragt und nicht gespeichert. Alternativ `node scripts/setup-server.mjs` starten und den Schlüssel auf `http://127.0.0.1:4174/` eingeben.
-6. Anschliessend die unten beschriebene Erstregistrierung einrichten und persönliche Registrierungslinks erzeugen. Jede Person erhält nur ihren eigenen Link und legt ihr Passwort selbst fest. Private Einrichtungsdateien und geheime Schlüssel dürfen nie auf GitHub oder die Webseite.
+6. Anschliessend die unten beschriebene freie Registrierung einrichten. Jede Person legt ihr Passwort direkt auf der Webseite selbst fest. Private Einrichtungsdateien und geheime Schlüssel dürfen nie auf GitHub oder die Webseite.
 
 Die Logins nutzen interne Adressen wie `tim@kuchenliga.invalid`. Das sind keine realen E-Mail-Postfächer und sie versenden keine Mails. Bei vergessenem Passwort muss der Projektbesitzer den Zugang administrativ zurücksetzen. Die Webseite selbst erlaubt keine Registrierung oder Passwortänderung.
 
@@ -97,12 +97,12 @@ Die Kuchenübersicht verwendet grosse Kacheln. Nach der Registrierung erscheint 
 
 `supabase/photos.sql` richtet den privaten Storage-Bucket `cake-photos` ein. Die Klasse darf Fotos lesen; ausschliesslich die zugehörige backende Person darf ihr festes Objekt `<login>.webp` hochladen oder ersetzen. Berni, Joel Stocker und Raphael besitzen keinen Kuchen. Nicht angemeldete Besucher sehen neutrale Platzhalter. Links zu Bildern sind zeitlich begrenzt.
 
-## Erstregistrierung mit eigenem Passwort
+## Freie Registrierung mit eigenem Passwort
 
-Die anfängliche Passwortverteilung ist ersetzt durch persönliche, einmalige Registrierungslinks. Jede Person öffnet ihren Link und wählt ein eigenes Passwort mit 12–128 Zeichen. Ein öffentlich auswählbarer Name allein vergibt keinen Zugang.
+Auf der Webseite steht direkt der Button **Registrieren**. Jede Person wählt einen der zwölf vorgegebenen Namen und legt ein eigenes Passwort mit 12–128 Zeichen fest. Danach wird sie angemeldet. Es sind weder Einladungslinks noch E-Mails, Klassencodes oder einzelne Freigaben nötig.
 
-Einrichtung: `schema.sql`, `photos.sql` und `registration.sql` ausführen; die Edge Function `supabase/functions/register/index.ts` als `register` bereitstellen. Die Funktion prüft Einladungen selbst; `verify_jwt = false` steht deshalb explizit in `supabase/config.toml`. Die automatisch bereitgestellten `SUPABASE_URL` und `SUPABASE_SERVICE_ROLE_KEY` bleiben ausschliesslich serverseitig.
+Ein Name kann nur einmal registriert werden. Die Datenbank reserviert ihn während der Einrichtung; nach erfolgreicher Passwortvergabe ist eine erneute Registrierung ausgeschlossen. Fehler geben die Reservierung wieder frei. Bestehende Passwörter lassen sich über den Registrieren-Button nicht überschreiben.
 
-Der erste Aufruf prüft den nur gehasht gespeicherten Einladungstoken. Beim Festlegen des Passworts reserviert die Datenbank den Link kurz, die Funktion setzt das Passwort über die offizielle Auth Admin API und bestätigt anschliessend die Aktivierung. Fehlgeschlagene Versuche geben die Reservierung frei; ein erfolgreicher Link ist danach ungültig. Unregistrierte Konten dürfen keine Stimmen abgeben.
+**Bewusst gewählte Einschränkung:** Es gibt keine Identitätsprüfung. Wer zuerst einen noch freien Namen auswählt, erhält diesen Zugang. Das kann auch eine andere Person sein. Diese freie Registrierung wurde vom Organisator ausdrücklich gewählt. Nach der Anmeldung gelten weiterhin die einmalige Bewertung pro Kuchen, die Terminsperren und der Schutz fremder Fotos.
 
-Der Organisator erzeugt die Links einmalig mit `node scripts/invites-server.mjs` und dem bestehenden geheimen Projektschlüssel auf `http://127.0.0.1:4174/`. Die private Liste steht in `private/kuchenliga-registrierungslinks.csv`. Jede Person erhält nur ihren eigenen Link. Links gelten 30 Tage; verbrauchte Links vergeben keinen zweiten Zugang. Das gewählte Passwort wird nicht in der Linkliste gespeichert oder an den Organisator übermittelt.
+Technik: Nach `schema.sql`, `photos.sql` und `registration.sql` auch `free-registration.sql` ausführen. `supabase/functions/register/index.ts` als Edge Function `register` bereitstellen; `verify_jwt=false` ist in `supabase/config.toml` festgelegt. Der geheime Projektschlüssel bleibt ausschliesslich serverseitig. Die alten privaten Linkdateien werden für diese Registrierung nicht mehr benötigt.
