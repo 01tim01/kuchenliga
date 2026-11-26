@@ -120,3 +120,7 @@ Die Ansichten sind für `anon` und `authenticated` gesperrt und nur über die Pr
 ## Eigene Profilbilder
 
 Im eigenen Profil kann jede registrierte Person ein Profilbild hochladen, ersetzen oder entfernen. Dazu `supabase/profile-photos.sql` anwenden. Der private Bucket `profile-photos` speichert je Person nur `<login>.webp`, maximal 1 MB. Der Browser verkleinert Fotos und entfernt eingebettete Fotometadaten. Klassenmitglieder können die Bilder sehen; nur die jeweilige Person darf ihr eigenes Bild ändern oder löschen. Nach dem Entfernen erscheint wieder der gewählte Emoji-Avatar. Berny behält intern den bestehenden Login `berni`.
+
+## Passwort vergessen
+
+Passwort-Links werden auf Anfrage von der Administration über Supabase Auth erstellt und privat weitergegeben. Jede Person legt über `passwort.html` ihr neues Passwort selbst fest. Der Link ist einmalig und zeitlich begrenzt; Konten, Profile und Bewertungen bleiben erhalten. Es wird kein E-Mail-Dienst benötigt. Die Seite tauscht den Link erst beim Absenden gegen eine Wiederherstellungssitzung, speichert keine Zugangsdaten und entfernt das Token sofort aus der Adresszeile. Administrator-Schlüssel und persönliche Links gehören ausschliesslich in `private/` oder in einen lokalen Helfer, niemals ins öffentliche Repository.
