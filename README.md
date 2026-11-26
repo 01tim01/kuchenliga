@@ -11,7 +11,7 @@ Nur abstimmen: Joel Stocker, Raphael und Berny (Lehrer).
 |---|---|
 | 13.11.2026 | Nico |
 | 20.11.2026 | Livio |
-| 27.11.2026 | Kimo |
+| 26.11.2026 | Kimo |
 | 04.12.2026 | Kyle |
 | 11.12.2026 | Noemi |
 | 18.12.2026 | Maria |

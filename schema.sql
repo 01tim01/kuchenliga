@@ -24,7 +24,7 @@ create table if not exists public.profiles (
   color text not null default '#eaf3fc' check (color in ('#eaf3fc','#f9e9ee','#e8f2ef','#fff1d5','#eeeaf5','#fae9df'))
 );
 insert into public.participants(id,name,baking_date) values
- ('nico','Nico','2026-11-13'), ('livio','Livio','2026-11-20'), ('kimo','Kimo','2026-11-27'),
+ ('nico','Nico','2026-11-13'), ('livio','Livio','2026-11-20'), ('kimo','Kimo','2026-11-26'),
  ('kyle','Kyle','2026-12-04'), ('noemi','Noemi','2026-12-11'), ('maria','Maria','2026-12-18'),
  ('anina','Anina','2027-01-08'), ('joel-haeusler','Joel Häusler','2027-01-15'), ('tim','Tim','2027-01-22')
 on conflict (id) do update set name=excluded.name,baking_date=excluded.baking_date;
